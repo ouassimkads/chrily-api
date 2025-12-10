@@ -22,19 +22,17 @@ export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
   @Get()
-  async findAll(): Promise<Product[]> {
+  async findAll(@Query('storeId') storeId?: string): Promise<Product[]> {
+    if (storeId) {
+      return this.productsService.getProductsByStore(Number(storeId));
+    }
     return this.productsService.findAll();
   }
-
   @Get(':id')
   async findOne(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<Product | null> {
     return this.productsService.findOne(id);
-  }
-  @Get()
-  async getProducts(@Query('storeId') storeId: string) {
-    return this.productsService.getProductsByStore(Number(storeId));
   }
 
   @Post()
