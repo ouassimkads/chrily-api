@@ -44,4 +44,9 @@ export class ProductsService {
       where: { id },
     });
   }
+  async getProductsByStore(storeId: number) {
+    return this.prisma.product.findMany({
+      where: { storeId },
+    });
+  }
 }

@@ -8,6 +8,7 @@ import {
   Body,
   ParseIntPipe,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { Product } from '@prisma/client';
@@ -30,6 +31,10 @@ export class ProductsController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<Product | null> {
     return this.productsService.findOne(id);
+  }
+  @Get()
+  async getProducts(@Query('storeId') storeId: string) {
+    return this.productsService.getProductsByStore(Number(storeId));
   }
 
   @Post()
