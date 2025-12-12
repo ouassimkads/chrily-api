@@ -22,12 +22,21 @@ export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
   @Get()
-  async findAll(@Query('storeId') storeId?: string): Promise<Product[]> {
+  async findAll(@Query('storeId') storeId?: string) {
+    let products: Product[];
+
     if (storeId) {
-      return this.productsService.getProductsByStore(Number(storeId));
+      products = await this.productsService.getProductsByStore(Number(storeId));
+    } else {
+      products = await this.productsService.findAll();
     }
-    return this.productsService.findAll();
+
+    return {
+      data: products, // مهم جدًا
+      total: products.length, // مهم للـ pagination
+    };
   }
+
   @Get(':id')
   async findOne(
     @Param('id', ParseIntPipe) id: number,
@@ -37,8 +46,9 @@ export class ProductsController {
 
   @Post()
   // @Roles(Role.ADMIN)
-  async create(@Body() data: any): Promise<Product> {
-    return this.productsService.create(data);
+  async create(@Body() body: any): Promise<Product> {
+    const product = await this.productsService.create(body);
+    return { data: product };
   }
 
   @Patch(':id')
