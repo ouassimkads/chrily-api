@@ -22,18 +22,16 @@ export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
   @Get()
-  async findAll(@Query('storeId') storeId?: string) {
-    let products: Product[];
-
-    if (storeId) {
-      products = await this.productsService.getProductsByStore(Number(storeId));
-    } else {
-      products = await this.productsService.findAll();
-    }
+  async findAll(
+    @Query('storeId') storeId?: string,
+  ): Promise<{ data: Product[]; total: number }> {
+    const products = storeId
+      ? await this.productsService.getProductsByStore(Number(storeId))
+      : await this.productsService.findAll();
 
     return {
-      data: products, // مهم جدًا
-      total: products.length, // مهم للـ pagination
+      data: products,
+      total: products.length,
     };
   }
 
@@ -46,9 +44,18 @@ export class ProductsController {
 
   @Post()
   // @Roles(Role.ADMIN)
-  async create(@Body() body: any): Promise<Product> {
-    const product = await this.productsService.create(body);
-    return { data: product };
+  async create(@Body() body: any): Promise<{ data: Product }> {
+    // <-- هنا
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const data = {
+      ...body,
+      price: Number(body.price),
+      categoryId: Number(body.categoryId),
+      storeId: Number(body.storeId),
+    };
+
+    const product = await this.productsService.create(data);
+    return { data: product }; // ✅ TypeScript يوافق الآن
   }
 
   @Patch(':id')
