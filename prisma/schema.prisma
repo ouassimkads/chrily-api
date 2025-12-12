@@ -21,32 +21,31 @@ datasource db {
 
 // USERS
 model User {
-  id            Int       @id @default(autoincrement())
-  email         String    @unique
-  name          String
-  phone         String    @unique
-  password      String
-  address       String?
-  role     String @default("user")
-  createdAt     DateTime  @default(now())
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  name     String
+  phone    String   @unique
+  password String
+  address  String?
+  role     String   @default("user")
+  createdAt DateTime @default(now())
 
-  cart          Cart?
-  orders        Order[]
+  cart     Cart?
+  orders   Order[]
 }
 
 // CATEGORIES
 model Category {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   name      String
   imageUrl  String?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
-  products  Product[]  // جميع المنتجات المرتبطة بهذه الفئة
+  products  Product[]
 }
 
 
 
-// PRODUCTS
 model Product {
   id          Int      @id @default(autoincrement())
   name        String
@@ -57,14 +56,15 @@ model Product {
   createdAt   DateTime @default(now())
 
   categoryId  Int
-  category    Category @relation(fields: [categoryId], references: [id])
-  // العلاقة مع المتجر
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
   storeId     Int?
-  store       Store?     @relation(fields: [storeId], references: [id])
+  store       Store?   @relation(fields: [storeId], references: [id], onDelete: Cascade)
 
   cartItems   CartItem[]
   orderItems  OrderItem[]
 }
+
 // STORES
 model Store {
   id          Int       @id @default(autoincrement())
@@ -76,31 +76,32 @@ model Store {
   isActive    Boolean   @default(true)
   createdAt   DateTime  @default(now())
 
-  // علاقة "متجر يحتوي منتجات"
   products    Product[]
 }
+
 // CART (سلة المستخدم)
+
 model Cart {
-  id        Int        @id @default(autoincrement())
-  userId    Int        @unique        // كل مستخدم له سلة واحدة
-  createdAt DateTime   @default(now())
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  createdAt DateTime @default(now())
   
-  user      User       @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   items     CartItem[]
 }
 
 // CART ITEMS
 model CartItem {
-  id        Int      @id @default(autoincrement())
-  quantity  Int      @default(1)
+  id        Int     @id @default(autoincrement())
+  quantity  Int     @default(1)
 
   cartId    Int
-  cart      Cart     @relation(fields: [cartId], references: [id])
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
 
   productId Int
-  product   Product  @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  @@unique([cartId, productId]) // منتج واحد فقط لكل سلة
+  @@unique([cartId, productId])
 }
 
 // ORDERS 
@@ -114,24 +115,23 @@ model Order {
   createdAt     DateTime    @default(now())
 
   userId        Int
-  user          User        @relation(fields: [userId], references: [id])
-
-
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   items         OrderItem[]
 }
 
+
 // ORDER ITEMS
 model OrderItem {
-  id        Int      @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   quantity  Int
   price     Float
 
   orderId   Int
-  order     Order     @relation(fields: [orderId], references: [id])
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   productId Int
-  product   Product   @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
 // ENUMS
