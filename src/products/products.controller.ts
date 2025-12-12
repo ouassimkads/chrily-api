@@ -62,7 +62,8 @@ export class ProductsController {
 
   @Delete(':id')
   // @Roles(Role.ADMIN)
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<Product> {
-    return this.productsService.remove(id);
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    await this.productsService.remove(id); // نحذف المنتج
+    return { data: { id } }; // ✅ React Admin يحتاج هذا الشكل
   }
 }
