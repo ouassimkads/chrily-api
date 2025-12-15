@@ -6,10 +6,27 @@ import { Category } from '@prisma/client';
 export class CategoryService {
   constructor(private prisma: PrismaService) {}
 
-  //! Create New Category
-  async createCategory(name: string, imageUrl?: string): Promise<Category> {
+  //TODO: Create New Category
+  /**
+   * For Create New
+   * @param name
+   * @param imageUrl
+   * @param storeId
+   * @returns
+   */
+  async createCategory(
+    name: string,
+    imageUrl: string | undefined,
+    storeId: number, // ← إضافة معرف المتجر
+  ): Promise<Category> {
     return this.prisma.category.create({
-      data: { name, imageUrl },
+      data: {
+        name,
+        imageUrl,
+        store: {
+          connect: { id: storeId },
+        },
+      },
     });
   }
 

@@ -9,6 +9,11 @@ import { ProductsModule } from './products/products.module';
 import { CartModule } from './cart/cart.module';
 import { OrderModule } from './order/order.module';
 import { StoreModule } from './store/store.module';
+import { orderItemService } from './order-item/order-item.service';
+import { OrderItemController } from './order-item/order-item.controller';
+import { OrderItemModule } from './order-item/order-item.module';
+import { UsersModule } from './users/users.module';
+import { SupabaseService } from './supabase/supabase.service';
 
 @Module({
   imports: [
@@ -19,8 +24,10 @@ import { StoreModule } from './store/store.module';
     CartModule,
     OrderModule,
     StoreModule,
+    OrderItemModule,
+    UsersModule,
   ],
-  controllers: [AppController, AuthController],
-  providers: [AppService],
+  controllers: [AppController, AuthController, OrderItemController],
+  providers: [AppService, orderItemService, SupabaseService],
 })
 export class AppModule {}

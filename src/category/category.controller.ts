@@ -14,35 +14,62 @@ import { CategoryService } from './category.service';
 export class CategoryController {
   constructor(private categoryService: CategoryService) {}
 
+  //TODO:  CREATE NEW CATEGORY
+  /**
+   * The end point: POST categories with this JSON
+   *  {
+    "name": "nazim nazim",
+    "imageUrl": "image/nazimnazim",
+    "storeId": 8
+    }
+   *
+   */
   @Post()
   async create(
-    @Body('name') name: string,
-    @Body('imageUrl') imageUrl?: string,
+    @Body() body: { name: string; imageUrl?: string; storeId: number },
   ) {
-    return this.categoryService.createCategory(name, imageUrl);
+    return this.categoryService.createCategory(
+      body.name,
+      body.imageUrl,
+      body.storeId,
+    );
   }
 
-  @Get()
-  async findAll() {
-    return this.categoryService.getAllCategories();
-  }
-
+  //TODO:  get One Category
+  //? GET http://localhost:3000/categories/5
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.categoryService.getCategoryById(id);
+    const category = await this.categoryService.getCategoryById(id);
+    return { data: category };
   }
 
+  //TODO: update gategory
+  //! you can for example update only the name or image
+  /**
+   * http://localhost:3000/categories/5
+   * @param id
+   * @param name
+   * @param imageUrl
+   * @returns
+   */
   @Patch(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body('name') name?: string,
     @Body('imageUrl') imageUrl?: string,
   ) {
-    return this.categoryService.updateCategory(id, name, imageUrl);
+    const category = await this.categoryService.updateCategory(
+      id,
+      name,
+      imageUrl,
+    );
+    return { data: category };
   }
 
+  //TODO: Remove one category
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number) {
-    return this.categoryService.deleteCategory(id);
+    await this.categoryService.deleteCategory(id);
+    return { data: { id } };
   }
 }

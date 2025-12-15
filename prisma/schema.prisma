@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  
 }
 
 datasource db {
@@ -14,37 +13,39 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 // ----------------------------
 // Models
 // ----------------------------
 
 // USERS
 model User {
-  id       Int      @id @default(autoincrement())
-  email    String   @unique
-  name     String
-  phone    String   @unique
-  password String
-  address  String?
-  role     String   @default("user")
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String
+  phone     String   @unique
+  password  String
+  address   String?
+  role      String   @default("user")
   createdAt DateTime @default(now())
 
-  cart     Cart?
-  orders   Order[]
+  cart   Cart?
+  orders Order[]
 }
 
 // CATEGORIES
 model Category {
-  id        Int       @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   name      String
+  storeId Int 
   imageUrl  String?
-  createdAt DateTime  @default(now())
+  createdAt DateTime @default(now())
+  isAvailable Boolean @default(true)  // ← حقل جديد لتحديد التوفر
 
-  products  Product[]
+  
+  store   Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  products Product[]
 }
-
-
 
 model Product {
   id          Int      @id @default(autoincrement())
@@ -55,28 +56,29 @@ model Product {
   isAvailable Boolean  @default(true)
   createdAt   DateTime @default(now())
 
-  categoryId  Int
-  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
-  storeId     Int?
-  store       Store?   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  storeId Int?
+  store   Store? @relation(fields: [storeId], references: [id], onDelete: Cascade)
 
-  cartItems   CartItem[]
-  orderItems  OrderItem[]
+  cartItems  CartItem[]
+  orderItems OrderItem[]
 }
 
 // STORES
 model Store {
-  id          Int       @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   name        String
   description String?
   imageUrl    String?
   address     String?
   phone       String?
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
 
-  products    Product[]
+  products   Product[]
+  categories Category[] // ← العلاقة المعكوسة
 }
 
 // CART (سلة المستخدم)
@@ -85,18 +87,18 @@ model Cart {
   id        Int      @id @default(autoincrement())
   userId    Int      @unique
   createdAt DateTime @default(now())
-  
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items     CartItem[]
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
 }
 
 // CART ITEMS
 model CartItem {
-  id        Int     @id @default(autoincrement())
-  quantity  Int     @default(1)
+  id       Int @id @default(autoincrement())
+  quantity Int @default(1)
 
-  cartId    Int
-  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cartId Int
+  cart   Cart @relation(fields: [cartId], references: [id], onDelete: Cascade)
 
   productId Int
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -106,29 +108,29 @@ model CartItem {
 
 // ORDERS 
 model Order {
-  id            Int        @id @default(autoincrement())
+  id            Int         @id @default(autoincrement())
   totalPrice    Float
+  phoneNumber   String // ← تأكد من وجوده هنا
   deliveryPrice Float
   finalPrice    Float
   paymentMethod String      @default("cash_on_delivery")
   status        OrderStatus @default(pending)
   createdAt     DateTime    @default(now())
 
-  userId        Int
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int? // ← أصبح اختياري
+  user   User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  items         OrderItem[]
+  items OrderItem[]
 }
-
 
 // ORDER ITEMS
 model OrderItem {
-  id        Int     @id @default(autoincrement())
-  quantity  Int
-  price     Float
+  id       Int   @id @default(autoincrement())
+  quantity Int
+  price    Float
 
-  orderId   Int
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId Int
+  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   productId Int
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -137,8 +139,8 @@ model OrderItem {
 // ENUMS
 enum OrderStatus {
   pending
-  accepted
   delivering
   completed
-  cancelled
+  canceled
+  preparing // أضفه إذا كنت تريد استخدامه
 }

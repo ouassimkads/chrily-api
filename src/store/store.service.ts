@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
+import { Store } from '@prisma/client';
 
 @Injectable()
 export class StoreService {
@@ -13,12 +14,57 @@ export class StoreService {
       data,
     });
   }
+  //TODO:  Update status
+  async updateStatus(id: number, isActive: boolean) {
+    const store = await this.prisma.store.findUnique({
+      where: { id },
+    });
 
+    if (!store) {
+      throw new NotFoundException('المتجر غير موجود');
+    }
+
+    return this.prisma.store.update({
+      where: { id },
+      data: { isActive },
+    });
+  }
+  
   // Find all
-  findAll() {
-    return this.prisma.store.findMany();
+  // NestJS service مثال
+  async findAllStores(params?: { skip?: number; take?: number }) {
+    return this.prisma.store.findMany({
+      skip: params?.skip,
+      take: params?.take,
+      include: {
+        categories: {
+          include: { products: true },
+        },
+      },
+    });
+  }
+  async findByIdWithCategoriesAndProducts(id: number) {
+    return this.prisma.store.findUnique({
+      where: { id },
+      include: {
+        categories: {
+          include: {
+            products: true,
+          },
+        },
+      },
+    });
   }
 
+  async countAllStores(): Promise<number> {
+    return this.prisma.store.count();
+  }
+  // ✅ الدالة الجديدة: البحث حسب IDs
+  async findManyByIds(ids: number[]): Promise<Store[]> {
+    return this.prisma.store.findMany({
+      where: { id: { in: ids } },
+    });
+  }
   // Find one
   async findOne(id: number) {
     const store = await this.prisma.store.findUnique({

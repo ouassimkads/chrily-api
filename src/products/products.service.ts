@@ -1,10 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Product } from '@prisma/client';
-
+import { SupabaseService } from 'src/supabase/supabase.service';
 @Injectable()
 export class ProductsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private supabaseService: SupabaseService,
+  ) {}
 
   //! Get All Products
   async findAll(): Promise<Product[]> {
@@ -26,7 +29,17 @@ export class ProductsService {
     imageUrl?: string;
     isAvailable?: boolean;
     categoryId: number;
+    storeId: number; // ✅ مهم
   }): Promise<Product> {
+    const category = await this.prisma.category.findFirst({
+      where: {
+        id: data.categoryId,
+        storeId: data.storeId,
+      },
+    });
+    if (!category) {
+      throw new BadRequestException('الفئة لا تنتمي لهذا المتجر');
+    }
     return this.prisma.product.create({ data });
   }
 
@@ -44,9 +57,37 @@ export class ProductsService {
       where: { id },
     });
   }
+
+  //! Get Products by Store
   async getProductsByStore(storeId: number) {
     return this.prisma.product.findMany({
       where: { storeId },
+    });
+  }
+
+  //? NOT USED ** بحث نصي عبر كل المنتجات **
+
+  async searchProducts(q: string): Promise<Product[]> {
+    return this.prisma.product.findMany({
+      where: {
+        OR: [
+          { name: { contains: q, mode: 'insensitive' } },
+          { description: { contains: q, mode: 'insensitive' } },
+        ],
+      },
+    });
+  }
+
+  //? NOT USED  ** بحث نصي داخل منتجات متجر معين **
+  async findByStoreAndSearch(storeId: number, q: string): Promise<Product[]> {
+    return this.prisma.product.findMany({
+      where: {
+        storeId,
+        OR: [
+          { name: { contains: q, mode: 'insensitive' } },
+          { description: { contains: q, mode: 'insensitive' } },
+        ],
+      },
     });
   }
 }
