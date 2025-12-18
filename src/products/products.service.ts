@@ -1,7 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Product } from '@prisma/client';
+import { Prisma, Product } from '@prisma/client';
 import { SupabaseService } from 'src/supabase/supabase.service';
+type ProductWithOptions = Prisma.ProductGetPayload<{
+  include: { options: true };
+}>;
 @Injectable()
 export class ProductsService {
   constructor(
@@ -15,9 +18,12 @@ export class ProductsService {
   }
 
   //! Get Product by ID
-  async findOne(id: number): Promise<Product | null> {
+  async findOne(id: number): Promise<ProductWithOptions | null> {
     return this.prisma.product.findUnique({
       where: { id },
+      include: {
+        options: true,
+      },
     });
   }
 
