@@ -62,6 +62,9 @@ export class ProductsService {
   async getProductsByStore(storeId: number) {
     return this.prisma.product.findMany({
       where: { storeId },
+      include: {
+        options: true, // جلب product options إن وُجدت
+      },
     });
   }
 
