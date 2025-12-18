@@ -35,31 +35,39 @@ export class StoreController {
   }
 
   @Get()
-  async findAll(
-    @Query('ids') ids?: string,
-    @Query('skip') skip = '0',
-    @Query('take') take = '10',
-  ): Promise<{ data: Store[]; total: number }> {
-    let stores;
+  // async findAll(
+  //   @Query('ids') ids?: string,
+  //   @Query('skip') skip = '0',
+  //   @Query('take') take = '10',
+  // ): Promise<{ data: Store[]; total: number }> {
+  //   let stores;
 
-    // تحويل القيم من string إلى number
-    const skipNumber = parseInt(skip as string, 10) || 0;
-    const takeNumber = parseInt(take as string, 10) || 10;
+  //   // تحويل القيم من string إلى number
+  //   const skipNumber = parseInt(skip as string, 10) || 0;
+  //   const takeNumber = parseInt(take as string, 10) || 10;
 
-    if (ids) {
-      const idArray = ids.split(',').map(Number);
-      stores = await this.storeService.findManyByIds(idArray);
-    } else {
-      stores = await this.storeService.findAllStores({
-        skip: skipNumber,
-        take: takeNumber,
-      });
-    }
+  //   if (ids) {
+  //     const idArray = ids.split(',').map(Number);
+  //     stores = await this.storeService.findManyByIds(idArray);
+  //   } else {
+  //     stores = await this.storeService.findAllStores({
+  //       skip: skipNumber,
+  //       take: takeNumber,
+  //     });
+  //   }
 
+  //   const total = await this.storeService.countAllStores();
+  //   return { data: stores, total };
+  // }
+  async findAll(): Promise<{ data: Store[]; total: number }> {
+    // جلب جميع المتاجر
+    const stores = await this.storeService.findAllStores();
+
+    // حساب العدد الكلي
     const total = await this.storeService.countAllStores();
+
     return { data: stores, total };
   }
-
   @Get(':id')
   async findOne(@Param('id') id: number) {
     const store = await this.storeService.findByIdWithCategoriesAndProducts(

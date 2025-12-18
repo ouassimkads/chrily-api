@@ -29,18 +29,12 @@ export class StoreService {
       data: { isActive },
     });
   }
-
   // Find all
   // NestJS service مثال
   async findAllStores(params?: { skip?: number; take?: number }) {
     return this.prisma.store.findMany({
       skip: params?.skip,
       take: params?.take,
-      include: {
-        categories: {
-          include: { products: true },
-        },
-      },
     });
   }
   async findByIdWithCategoriesAndProducts(id: number) {
