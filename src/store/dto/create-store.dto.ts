@@ -1,4 +1,5 @@
-import { IsOptional, IsString, IsBoolean } from 'class-validator';
+import { StoreCategory } from '@prisma/client';
+import { IsOptional, IsString, IsBoolean, IsEnum } from 'class-validator';
 
 export class CreateStoreDto {
   @IsString()
@@ -19,6 +20,9 @@ export class CreateStoreDto {
   @IsOptional()
   @IsString()
   address?: string;
+
+  @IsEnum(StoreCategory)
+  category: StoreCategory;
 
   @IsOptional()
   @IsString()

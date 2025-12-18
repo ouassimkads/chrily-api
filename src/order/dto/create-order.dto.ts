@@ -27,6 +27,9 @@ export class CreateOrderDto {
   @IsString()
   paymentMethod: string;
 
+  @IsNumber()
+  storeId: number;
+
   @IsArray()
   @ArrayNotEmpty()
   @ValidateNested({ each: true })

@@ -28,6 +28,7 @@ export class OrderService {
     items: { productId: number; quantity: number }[],
     deliveryPrice: number,
     paymentMethod: string = 'cash_on_delivery',
+    storeId: number,
     userId?: number,
   ) {
     if (!phoneNumber) throw new BadRequestException('Phone number is required');
@@ -69,6 +70,7 @@ export class OrderService {
         deliveryPrice,
         finalPrice,
         paymentMethod,
+        storeId,
         items: { create: orderItems },
       },
       include: { items: true },

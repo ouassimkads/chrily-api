@@ -75,10 +75,13 @@ model Store {
   address     String?
   phone       String?
   isActive    Boolean  @default(true)
+  category    StoreCategory
+
   createdAt   DateTime @default(now())
 
   products   Product[]
-  categories Category[] // ← العلاقة المعكوسة
+  categories Category[] 
+  orders     Order[]
 }
 
 // CART (سلة المستخدم)
@@ -117,6 +120,10 @@ model Order {
   status        OrderStatus @default(pending)
   createdAt     DateTime    @default(now())
 
+  storeId Int
+  store   Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+
   userId Int? // ← أصبح اختياري
   user   User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -144,3 +151,12 @@ enum OrderStatus {
   canceled
   preparing // أضفه إذا كنت تريد استخدامه
 }
+
+enum StoreCategory {
+  fast_food
+  restaurant
+  pharmacy
+  supermarket
+  baby_store
+}
+

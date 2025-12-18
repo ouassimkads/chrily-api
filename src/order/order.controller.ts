@@ -41,7 +41,7 @@ export class OrderController {
         body.items,
         body.deliveryPrice,
         body.paymentMethod,
-        undefined,
+        body.storeId,
       ),
     };
   }

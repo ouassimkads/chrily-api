@@ -29,7 +29,7 @@ export class StoreService {
       data: { isActive },
     });
   }
-  
+
   // Find all
   // NestJS service مثال
   async findAllStores(params?: { skip?: number; take?: number }) {
