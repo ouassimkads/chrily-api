@@ -62,7 +62,7 @@ export class OrderService {
     const finalPrice = totalPrice + deliveryPrice;
 
     //? create the order with ptisma
-    return this.prisma.order.create({
+    const order = await this.prisma.order.create({
       data: {
         userId, // يمكن أن يكون undefined
         phoneNumber,
@@ -75,6 +75,7 @@ export class OrderService {
       },
       include: { items: true },
     });
+    return { orderId: order.id };
   }
 
   /**
