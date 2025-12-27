@@ -40,15 +40,23 @@ export class OrderItemController {
   @Post(':id/add-item')
   addNewItemToOrderById(
     @Param('id') orderId: string,
-    @Body() body: { productId: number; quantity: number; price: number },
+    @Body()
+    body: {
+      productId: number;
+      quantity: number;
+      price: number;
+      productOptionId?: number;
+    },
   ) {
     return this.orderItemService.addNewItemToOrderById({
       orderId: Number(orderId),
       productId: body.productId,
       quantity: body.quantity,
       price: body.price,
+      productOptionId: body.productOptionId || null,
     });
   }
+
   //TODO: update price or quantity of one order_item
   // تحديث كمية أو سعر عنصر واحد داخل الطلب
   @Patch(':itemId')

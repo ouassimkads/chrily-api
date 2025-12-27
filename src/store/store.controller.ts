@@ -6,12 +6,14 @@ import {
   Patch,
   Param,
   Delete,
-  Query,
+  // Query,
   ParseIntPipe,
   UseInterceptors,
   UploadedFile,
   HttpException,
   HttpStatus,
+  NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { StoreService } from './store.service';
 import { CreateStoreDto } from './dto/create-store.dto';
@@ -27,47 +29,19 @@ export class StoreController {
     private readonly storeService: StoreService,
     private supabaseService: SupabaseService,
   ) {}
-
+  //TODO: Create Store
   @Post()
   async create(@Body() dto: CreateStoreDto) {
     const store = await this.storeService.create(dto);
     return { data: store };
   }
-
+  // TODO: Find all Stores
   @Get()
-  // async findAll(
-  //   @Query('ids') ids?: string,
-  //   @Query('skip') skip = '0',
-  //   @Query('take') take = '10',
-  // ): Promise<{ data: Store[]; total: number }> {
-  //   let stores;
-
-  //   // تحويل القيم من string إلى number
-  //   const skipNumber = parseInt(skip as string, 10) || 0;
-  //   const takeNumber = parseInt(take as string, 10) || 10;
-
-  //   if (ids) {
-  //     const idArray = ids.split(',').map(Number);
-  //     stores = await this.storeService.findManyByIds(idArray);
-  //   } else {
-  //     stores = await this.storeService.findAllStores({
-  //       skip: skipNumber,
-  //       take: takeNumber,
-  //     });
-  //   }
-
-  //   const total = await this.storeService.countAllStores();
-  //   return { data: stores, total };
-  // }
-  async findAll(): Promise<{ data: Store[]; total: number }> {
-    // جلب جميع المتاجر
+  async findAll(): Promise<{ data: Store[] }> {
     const stores = await this.storeService.findAllStores();
-
-    // حساب العدد الكلي
-    const total = await this.storeService.countAllStores();
-
-    return { data: stores, total };
+    return { data: stores };
   }
+  //TODO: Find one Store with Categories and Products
   @Get(':id')
   async findOne(@Param('id') id: number) {
     const store = await this.storeService.findByIdWithCategoriesAndProducts(
@@ -77,18 +51,13 @@ export class StoreController {
       data: store,
     };
   }
-
+  //TODO: Update Store
   @Patch(':id')
   async update(@Param('id') id: string, @Body() dto: UpdateStoreDto) {
     const store = await this.storeService.update(+id, dto);
     return { data: store };
   }
 
-  @Delete(':id')
-  async remove(@Param('id') id: string) {
-    const store = await this.storeService.remove(+id);
-    return { data: { id: +id } };
-  }
   //TODO:  Update status
   @Patch(':id/status')
   updateStatus(
@@ -96,6 +65,23 @@ export class StoreController {
     @Body() dto: UpdateStoreStatusDto,
   ) {
     return this.storeService.updateStatus(id, dto.isActive);
+  }
+
+  //TODO: Delete Store
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    const storeId = Number(id);
+    if (isNaN(storeId)) {
+      throw new BadRequestException('Invalid store ID');
+    }
+    const store = await this.storeService.remove(+id);
+    if (!store) {
+      throw new NotFoundException('ٍStore Not Found');
+    }
+    return {
+      message: 'The store has been successfully deleted',
+      data: { id: +id },
+    };
   }
 
   //----------------------------------------------------

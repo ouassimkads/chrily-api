@@ -42,6 +42,7 @@ export class OrderController {
         body.deliveryPrice,
         body.paymentMethod,
         body.storeId,
+        body.zoneId,
       ),
     };
   }

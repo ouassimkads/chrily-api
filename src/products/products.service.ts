@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, Product } from '@prisma/client';
 import { SupabaseService } from 'src/supabase/supabase.service';
+import { CreateProductOptionDto } from './dto/create-product-option.dto';
 type ProductWithOptions = Prisma.ProductGetPayload<{
   include: { options: true };
 }>;
@@ -11,23 +12,7 @@ export class ProductsService {
     private prisma: PrismaService,
     private supabaseService: SupabaseService,
   ) {}
-
-  //! Get All Products
-  async findAll(): Promise<Product[]> {
-    return this.prisma.product.findMany();
-  }
-
-  //! Get Product by ID
-  async findOne(id: number): Promise<ProductWithOptions | null> {
-    return this.prisma.product.findUnique({
-      where: { id },
-      include: {
-        options: true,
-      },
-    });
-  }
-
-  //! Create New Product
+  //TODO: Create New Product Service
   async create(data: {
     name: string;
     description?: string;
@@ -35,7 +20,7 @@ export class ProductsService {
     imageUrl?: string;
     isAvailable?: boolean;
     categoryId: number;
-    storeId: number; // ✅ مهم
+    storeId: number;
   }): Promise<Product> {
     const category = await this.prisma.category.findFirst({
       where: {
@@ -46,36 +31,58 @@ export class ProductsService {
     if (!category) {
       throw new BadRequestException('الفئة لا تنتمي لهذا المتجر');
     }
+
     return this.prisma.product.create({ data });
   }
 
-  //! Update Product
-  async update(id: number, data: Partial<Product>): Promise<Product> {
-    return this.prisma.product.update({
-      where: { id },
-      data,
-    });
+  //TODO: all the GET products service with filters
+
+  // ***********************************//
+  //? findAll GET all products
+  //? getProductsByStore GET products by store
+  //? findOne GET product by ID
+  //? findByStoreAndSearch GET products by store and search query
+  //? searchProducts GET products by search query
+  // ***********************************//
+
+  //? Get All Products
+  async findAll(): Promise<Product[]> {
+    return this.prisma.product.findMany();
   }
 
-  //! Remove Product
-  async remove(id: number): Promise<Product> {
-    return this.prisma.product.delete({
-      where: { id },
-    });
-  }
-
-  //! Get Products by Store
+  //? Get Products by Store
   async getProductsByStore(storeId: number) {
     return this.prisma.product.findMany({
       where: { storeId },
       include: {
-        options: true, // جلب product options إن وُجدت
+        options: true,
+        category: true,
       },
     });
   }
 
-  //? NOT USED ** بحث نصي عبر كل المنتجات **
-
+  //? Get Product by ID
+  async findOne(id: number): Promise<ProductWithOptions | null> {
+    return this.prisma.product.findUnique({
+      where: { id },
+      include: {
+        options: true,
+      },
+    });
+  }
+  //? search products by store and query
+  async findByStoreAndSearch(storeId: number, q: string): Promise<Product[]> {
+    return this.prisma.product.findMany({
+      where: {
+        storeId,
+        OR: [
+          { name: { contains: q, mode: 'insensitive' } },
+          { description: { contains: q, mode: 'insensitive' } },
+        ],
+      },
+    });
+  }
+  //? search products by query
   async searchProducts(q: string): Promise<Product[]> {
     return this.prisma.product.findMany({
       where: {
@@ -86,17 +93,46 @@ export class ProductsService {
       },
     });
   }
+  // add new productOption
+  async addProductOption(dto: CreateProductOptionDto) {
+    try {
+      const option = await this.prisma.productOption.create({
+        data: {
+          productId: dto.productId,
+          name: dto.name,
+          price: dto.price ?? 0,
+        },
+      });
 
-  //? NOT USED  ** بحث نصي داخل منتجات متجر معين **
-  async findByStoreAndSearch(storeId: number, q: string): Promise<Product[]> {
-    return this.prisma.product.findMany({
-      where: {
-        storeId,
-        OR: [
-          { name: { contains: q, mode: 'insensitive' } },
-          { description: { contains: q, mode: 'insensitive' } },
-        ],
-      },
+      return option;
+    } catch (error) {
+      console.error('Error adding product option:', error);
+      throw new Error('فشل إضافة خيار المنتج');
+    }
+  }
+  async getProductOptions(productId: number) {
+    return this.prisma.productOption.findMany({
+      where: { productId },
+    });
+  }
+  // حذف خيار معين
+  async removeProductOption(optionId: number) {
+    return this.prisma.productOption.delete({
+      where: { id: optionId },
+    });
+  }
+  //TODO: Update Product
+  async update(id: number, data: Partial<Product>): Promise<Product> {
+    return this.prisma.product.update({
+      where: { id },
+      data,
+    });
+  }
+
+  //TODO: Remove Product
+  async remove(id: number): Promise<Product> {
+    return this.prisma.product.delete({
+      where: { id },
     });
   }
 }

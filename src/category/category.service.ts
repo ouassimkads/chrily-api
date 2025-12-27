@@ -1,24 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Category } from '@prisma/client';
+import { CreateCategoryDto } from './dto/create-category.dto';
 
 @Injectable()
 export class CategoryService {
   constructor(private prisma: PrismaService) {}
 
   //TODO: Create New Category
-  /**
-   * For Create New
-   * @param name
-   * @param imageUrl
-   * @param storeId
-   * @returns
-   */
-  async createCategory(
-    name: string,
-    imageUrl: string | undefined,
-    storeId: number, // ← إضافة معرف المتجر
-  ): Promise<Category> {
+  async createCategory(dto: CreateCategoryDto): Promise<Category> {
+    const { name, imageUrl, storeId } = dto;
     return this.prisma.category.create({
       data: {
         name,
@@ -30,19 +21,12 @@ export class CategoryService {
     });
   }
 
-  //! Get All Gategory
-  async getAllCategories(): Promise<Category[]> {
-    return this.prisma.category.findMany({
-      orderBy: { createdAt: 'desc' },
-    });
-  }
-
-  //! Get Single Category
+  //TODO: Get Single Category
   async getCategoryById(id: number): Promise<Category | null> {
     return this.prisma.category.findUnique({ where: { id } });
   }
 
-  //! Update Category
+  //TODO: Update Category
   async updateCategory(
     id: number,
     name?: string,
@@ -54,7 +38,7 @@ export class CategoryService {
     });
   }
 
-  //! Remove Category
+  //TODO: Remove Category
   async deleteCategory(id: number): Promise<Category> {
     return this.prisma.category.delete({ where: { id } });
   }

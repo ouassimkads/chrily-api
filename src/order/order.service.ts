@@ -25,10 +25,11 @@ export class OrderService {
    */
   async createOrder(
     phoneNumber: string,
-    items: { productId: number; quantity: number }[],
+    items: { productId: number; quantity: number; productOptionId?: number }[],
     deliveryPrice: number,
     paymentMethod: string = 'cash_on_delivery',
     storeId: number,
+    zoneId: number,
     userId?: number,
   ) {
     if (!phoneNumber) throw new BadRequestException('Phone number is required');
@@ -50,6 +51,7 @@ export class OrderService {
         productId: item.productId,
         quantity: item.quantity,
         price: product.price,
+        productOptionId: item.productOptionId ?? null,
       };
     });
     //! caculate total of Items of the order
@@ -64,17 +66,19 @@ export class OrderService {
     //? create the order with ptisma
     const order = await this.prisma.order.create({
       data: {
-        userId, // يمكن أن يكون undefined
+        userId,
         phoneNumber,
         totalPrice,
         deliveryPrice,
         finalPrice,
         paymentMethod,
+        zoneId,
         storeId,
         items: { create: orderItems },
       },
       include: { items: true },
     });
+    console.log(orderItems);
     return { orderId: order.id };
   }
 

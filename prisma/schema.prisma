@@ -32,11 +32,31 @@ model User {
   orders Order[]
 }
 
+model StoreDeliveryPrice {
+  storeId Int
+  zoneId  Int
+  price   Float
+
+  store Store        @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  zone  DeliveryZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+
+  @@id([storeId, zoneId])
+}
+
+model DeliveryZone {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  deliveryPrices StoreDeliveryPrice[]
+  orders      Order[] 
+}
+
+
 // CATEGORIES
 model Category {
   id        Int      @id @default(autoincrement())
   name      String
-  storeId Int 
+  storeId   Int 
   imageUrl  String?
   createdAt DateTime @default(now())
   isAvailable Boolean @default(true)  // ← حقل جديد لتحديد التوفر
@@ -68,11 +88,13 @@ model Product {
 }
 model ProductOption {
   id        Int      @id @default(autoincrement())
-  name      String   // اسم الخيار: مثلا "tacos_xl" أو "علبة 5 كلغ"
-  price     Float   
+  name      String   
+  price     Float  
+  description String? 
   
   productId Int
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItems  OrderItem[]
   
   createdAt DateTime @default(now())
 }
@@ -93,6 +115,7 @@ model Store {
   products   Product[]
   categories Category[] 
   orders     Order[]
+  deliveryPrices StoreDeliveryPrice[]
 }
 
 // CART (سلة المستخدم)
@@ -124,18 +147,22 @@ model CartItem {
 model Order {
   id            Int         @id @default(autoincrement())
   totalPrice    Float
-  phoneNumber   String // ← تأكد من وجوده هنا
+  phoneNumber   String 
   deliveryPrice Float
   finalPrice    Float
   paymentMethod String      @default("cash_on_delivery")
   status        OrderStatus @default(pending)
   createdAt     DateTime    @default(now())
 
+  
+  zoneId Int?
+  zone   DeliveryZone? @relation(fields: [zoneId], references: [id])
+
   storeId Int
   store   Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
 
 
-  userId Int? // ← أصبح اختياري
+  userId Int?
   user   User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   items OrderItem[]
@@ -152,6 +179,12 @@ model OrderItem {
 
   productId Int
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  productOptionId Int?
+  productOption   ProductOption? @relation(fields: [productOptionId], references: [id])
+  
+  createdAt DateTime @default(now())
+
 }
 
 // ENUMS

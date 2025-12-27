@@ -20,6 +20,7 @@ export class orderItemService {
     productId: number;
     quantity: number;
     price: number;
+    productOptionId?: number | null;
   }) {
     // تحقق أن الطلب موجود
     const order = await this.prisma.order.findUnique({
@@ -44,6 +45,7 @@ export class orderItemService {
         productId: data.productId,
         quantity: data.quantity,
         price: data.price,
+        productOptionId: data.productOptionId || null,
       },
     });
   }

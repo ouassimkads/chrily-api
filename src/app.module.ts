@@ -14,6 +14,10 @@ import { OrderItemController } from './order-item/order-item.controller';
 import { OrderItemModule } from './order-item/order-item.module';
 import { UsersModule } from './users/users.module';
 import { SupabaseService } from './supabase/supabase.service';
+import { DeliveryPriceController } from './delivery-price/delivery-price.controller';
+import { DeliveryPriceService } from './delivery-price/delivery-price.service';
+import { DeliveryPriceModule } from './delivery-price/delivery-price.module';
+import { DeliveryAddressModule } from './delivery-address/delivery-address.module';
 
 @Module({
   imports: [
@@ -26,8 +30,20 @@ import { SupabaseService } from './supabase/supabase.service';
     StoreModule,
     OrderItemModule,
     UsersModule,
+    DeliveryPriceModule,
+    DeliveryAddressModule,
   ],
-  controllers: [AppController, AuthController, OrderItemController],
-  providers: [AppService, orderItemService, SupabaseService],
+  controllers: [
+    AppController,
+    AuthController,
+    OrderItemController,
+    DeliveryPriceController,
+  ],
+  providers: [
+    AppService,
+    orderItemService,
+    SupabaseService,
+    DeliveryPriceService,
+  ],
 })
 export class AppModule {}

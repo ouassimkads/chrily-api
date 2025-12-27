@@ -6,6 +6,7 @@ import {
   IsString,
   ValidateNested,
   ArrayNotEmpty,
+  IsOptional,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -15,6 +16,10 @@ export class OrderItemDto {
 
   @IsNumber()
   quantity: number;
+
+  @IsOptional()
+  @IsInt()
+  productOptionId?: number; // ← نفس الاسم كما في request JSON
 }
 
 export class CreateOrderDto {
@@ -29,6 +34,9 @@ export class CreateOrderDto {
 
   @IsNumber()
   storeId: number;
+
+  @IsNumber()
+  zoneId: number;
 
   @IsArray()
   @ArrayNotEmpty()

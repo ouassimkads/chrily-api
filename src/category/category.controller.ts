@@ -9,49 +9,27 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
+import { CreateCategoryDto } from './dto/create-category.dto';
 
 @Controller('categories')
 export class CategoryController {
   constructor(private categoryService: CategoryService) {}
 
   //TODO:  CREATE NEW CATEGORY
-  /**
-   * The end point: POST categories with this JSON
-   *  {
-    "name": "nazim nazim",
-    "imageUrl": "image/nazimnazim",
-    "storeId": 8
-    }
-   *
-   */
   @Post()
-  async create(
-    @Body() body: { name: string; imageUrl?: string; storeId: number },
-  ) {
-    return this.categoryService.createCategory(
-      body.name,
-      body.imageUrl,
-      body.storeId,
-    );
+  async create(@Body() body: CreateCategoryDto) {
+    return this.categoryService.createCategory(body);
   }
 
-  //TODO:  get One Category
-  //? GET http://localhost:3000/categories/5
+  //TODO:  READ ONE CATEGORY
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     const category = await this.categoryService.getCategoryById(id);
     return { data: category };
   }
 
-  //TODO: update gategory
-  //! you can for example update only the name or image
-  /**
-   * http://localhost:3000/categories/5
-   * @param id
-   * @param name
-   * @param imageUrl
-   * @returns
-   */
+  //TODO: UPDATE ONE GATEGORY
+
   @Patch(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -66,7 +44,7 @@ export class CategoryController {
     return { data: category };
   }
 
-  //TODO: Remove one category
+  //TODO: REMOVE ONE CATEGORY
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number) {
     await this.categoryService.deleteCategory(id);
